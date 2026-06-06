@@ -1,0 +1,83 @@
+{   
+    "characters":[
+        {
+    
+            "name": "Jicho",
+            "traits": ["Happy"],
+            "region": ["Rema"]
+        },
+        {
+            "name": "Amara",
+            "traits": ["Shy"],
+            "region": ["Rumo"]
+
+        },
+        {   
+            "name":"Sikio",
+            "traits": ["Hot head", "Flashy"],
+            "region": ["Rumo"]
+        },
+        {
+            "name":"Inzondo",
+            "traits": ["Quiet", "Calm"],
+            "region": ["Candros"]
+       
+        }, 
+        {
+            "name": "Hani",
+            "traits": ["Bubbly", "Optimistic"],
+            "region": ["Yumtal"]
+
+        },
+                {
+            "name": "Hibana",
+            "traits": ["Fiery", "Brave"],
+            "region": ["Rema"]
+
+        },
+                {
+            "name": "Sett",
+            "traits": ["Fighter"],
+            "region": ["Candros"]
+
+        },
+                {
+            "name": "Octavia",
+            "traits": [],
+            "region": ["Rema"]
+
+        },
+                {
+            "name": "Wisp",
+            "traits": [],
+            "region": []
+
+        }
+        
+    
+    ],
+    "regions":[ 
+        {
+             "name": "Rema",
+            "description": ["Humid", "Rainy"],
+            "people": ["Jicho"]
+        },
+        {
+            "name": "Rumo",
+            "description": ["Hot", "Dry"],
+            "people": ["Amara", "Sikio"]
+        },
+        {   
+            "name": "Yumtal",
+             "description": ["Cold"],
+             "people": ["Hani"]
+        },
+        {
+            "name": "Candros",
+            "descriptions":["Urban", "Castles"],
+            "people": ["Inzondo"]
+        }
+
+    ]
+
+}
