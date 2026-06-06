@@ -13,17 +13,15 @@ def get_db_connection():
     return conn
 
 
-# ----------------------------
 # GET ALL CHARACTERS (SQL VERSION)
-# ----------------------------
-
 @app.get("/characters/")
 def get_all_chars():
+    """Returns all characters only"""
     conn = get_db_connection()
     cursor = conn.cursor()
 
     cursor.execute("SELECT * FROM characters")
-    rows = cursor.fetchall() #featch all multi results
+    rows = cursor.fetchall() #all rows
 
     conn.close()
 
@@ -32,13 +30,26 @@ def get_all_chars():
 
 @app.get("/characters/{name}")
 def get_character(name):
+    """Return a character by exact name match."""
     conn = get_db_connection()
     cursor = conn.cursor()
 
     cursor.execute("Select * FROM characters WHERE name = ? ", (name,))
-    row = cursor.fetchone() #single result fetch one
+    row = cursor.fetchone() #one row
     conn.close()
     if row is None:
         raise HTTPException(status_code=404, detail="Character not found") 
     return dict(row)
 
+@app.get("/regions/")
+def get_all_regions():
+    """Returns all regions only"""
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM regions")
+    rows = cursor.fetchall() #all rows
+
+    conn.close()
+
+    # convert rows into clean JSON
+    return [dict(row) for row in rows]
