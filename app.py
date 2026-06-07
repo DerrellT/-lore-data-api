@@ -53,3 +53,16 @@ def get_all_regions():
 
     # convert rows into clean JSON
     return [dict(row) for row in rows]
+
+@app.get("/regions/{name}")
+def get_region(name):
+    """Return a region by exact name match."""
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    cursor.execute("Select * FROM regions WHERE name = ? ", (name,))
+    row = cursor.fetchone() #one row
+    conn.close()
+    if row is None:
+        raise HTTPException(status_code=404, detail="Region not found") 
+    return dict(row)
