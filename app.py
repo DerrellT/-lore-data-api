@@ -28,16 +28,16 @@ def get_all_chars():
     # convert rows into clean JSON
     return [dict(row) for row in rows]
 
-@app.get("/characters/{name}")
-def get_character(name):
+@app.get("/characters/{name}") #request is sent and name is extraced
+def get_character(name):        #name is extraced as parameter and calls get_char
     """Return a character by exact name match."""
-    conn = get_db_connection()
-    cursor = conn.cursor()
+    conn = get_db_connection()  #database is opened this opens lore.db
+    cursor = conn.cursor()      #cursor is created to send SQL commands from python
 
-    cursor.execute("Select * FROM characters WHERE name = ? ", (name,))
-    row = cursor.fetchone() #one row
-    conn.close()
-    if row is None:
+    cursor.execute("Select * FROM characters WHERE name = ? ", (name,)) #SQL is exectuted
+    row = cursor.fetchone() #one row and result is retrieved here
+    conn.close()            #close connection
+    if row is None:         #check if character exits
         raise HTTPException(status_code=404, detail="Character not found") 
     return dict(row)
 

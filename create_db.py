@@ -55,8 +55,8 @@ if cursor.fetchone()[0] == 0:
 
     # Insert first region
     cursor.execute("""
-    INSERT INTO regions (id, name,)
-    VALUES (1, 'Rema')
+    INSERT INTO regions (id, name)
+    VALUES (1, 'Rema'), (2, 'Rumo')
     """)
 
 
@@ -68,7 +68,7 @@ if cursor.fetchone()[0] == 0:
     # region_id = 1 means "Rema"
     cursor.execute("""
     INSERT INTO characters (id, name, region_id)
-    VALUES (1, 'Jicho', 1)
+    VALUES (1, 'Jicho', 1), (2, 'Amara', 1), (3, 'Sikio', 2)
     """)
 
 
