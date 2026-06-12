@@ -12,7 +12,6 @@ def get_db_connection():
     conn.row_factory = sqlite3.Row  # lets us return dict-like rows
     return conn
 
-
 # GET ALL CHARACTERS (SQL VERSION)
 @app.get("/characters/")
 def get_all_chars():
@@ -34,7 +33,7 @@ def get_character(name):        #name is extraced as parameter and calls get_cha
     conn = get_db_connection()  #database is opened this opens lore.db
     cursor = conn.cursor()      #cursor is created to send SQL commands from python
 
-    cursor.execute("Select * FROM characters WHERE name = ? ", (name,)) #SQL is exectuted
+    cursor.execute("SELECT * FROM characters WHERE name = ? ", (name,)) #SQL is exectuted
     row = cursor.fetchone() #one row and result is retrieved here
     conn.close()            #close connection
     if row is None:         #check if character exits
@@ -66,3 +65,32 @@ def get_region(name):
     if row is None:
         raise HTTPException(status_code=404, detail="Region not found") 
     return dict(row)
+
+@app.post("/characters/")
+def create_character(name: str, region_id: int): #str and int are the expected inputs
+    """Create a character."""
+    if not name:         
+        raise HTTPException(status_code=400, detail="Character name missing") 
+
+    if not region_id:        
+        raise HTTPException(status_code=400, detail="Region id missing") 
+ 
+    conn = get_db_connection()
+    cursor = conn.cursor()    
+    cursor.execute("SELECT * FROM regions WHERE id = ? ", (region_id,)) #compare existing region id to user input
+    row = cursor.fetchone()
+    if row is None:
+        raise HTTPException(status_code=400, detail="Invalid region_id")
+    cursor.execute("SELECT * FROM characters WHERE name = ? ", (name,)) #SQL is exectuted
+    name_row = cursor.fetchone()
+    if name_row:
+        raise HTTPException(status_code=400, detail="Name already exits")
+
+    cursor.execute("INSERT INTO characters (name, region_id) VALUES (?, ?)", (name, region_id)) # ? are place holders
+    conn.commit()
+    conn.close()  
+    return {"message": "Character created succesfully",
+            "name": name,
+            "region_id": region_id
+            }         
+   
