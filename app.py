@@ -77,20 +77,64 @@ def create_character(name: str, region_id: int): #str and int are the expected i
  
     conn = get_db_connection()
     cursor = conn.cursor()    
+    
     cursor.execute("SELECT * FROM regions WHERE id = ? ", (region_id,)) #compare existing region id to user input
     row = cursor.fetchone()
     if row is None:
         raise HTTPException(status_code=400, detail="Invalid region_id")
+    
     cursor.execute("SELECT * FROM characters WHERE name = ? ", (name,)) #SQL is exectuted
     name_row = cursor.fetchone()
     if name_row:
         raise HTTPException(status_code=400, detail="Name already exits")
 
     cursor.execute("INSERT INTO characters (name, region_id) VALUES (?, ?)", (name, region_id)) # ? are place holders
-    conn.commit()
+    conn.commit() #commit before we query data
+    
+    cursor.execute("SELECT * FROM characters WHERE name = ? ", (name,)) #return the char the user created instead of echoing
+    new_char = cursor.fetchone()
+    if new_char is None:
+        raise HTTPException(status_code=400, detail="Character loading error")
     conn.close()  
-    return {"message": "Character created succesfully",
-            "name": name,
-            "region_id": region_id
-            }         
-   
+    return dict(new_char)
+
+@app.put("/characters/")
+def update_character(character_id: int, updated_name: str, new_region_id: int):
+    """Update a character."""
+    if character_id is None:         
+        raise HTTPException(status_code=400, detail="Character field is empty") 
+
+    if not new_region_id:        
+        raise HTTPException(status_code=400, detail="Region field is empty") 
+    
+    if not updated_name:
+        raise HTTPException(status_code=400, detail="Updated name field is empty") 
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM regions WHERE id = ? ", (new_region_id,))
+    r_row = cursor.fetchone()
+    if r_row is None:
+        raise HTTPException(status_code=400, detail="Region does not exist")
+    
+    cursor.execute("SELECT * FROM characters WHERE id = ? ", (character_id,))
+    c_row = cursor.fetchone()
+    if c_row is None:        
+        raise HTTPException(status_code=404, detail="Character does not exist")
+
+    cursor.execute("SELECT * FROM characters WHERE name = ? AND id != ? ", (updated_name, character_id)) #checks for duplicate name but not this current character
+    name_row = cursor.fetchone()
+    if name_row:
+        raise HTTPException(status_code=400, detail="Name already exits with another id")
+
+    cursor.execute("UPDATE characters SET name = ?, region_id = ? WHERE id = ?", (updated_name, new_region_id, character_id))
+    conn.commit()
+    conn.close()
+    return {
+        "character_id": character_id,
+        "updated_name": updated_name,
+        "new_region_id": new_region_id,
+        "message": "Character updated successfully"
+        }
+# design to search for ID
+#    cursor.execute("DELETE FROM characters WHERE name = ? ", (old_name,))
