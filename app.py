@@ -136,5 +136,25 @@ def update_character(character_id: int, updated_name: str, new_region_id: int):
         "new_region_id": new_region_id,
         "message": "Character updated successfully"
         }
-# design to search for ID
-#    cursor.execute("DELETE FROM characters WHERE name = ? ", (old_name,))
+
+@app.delete("/characters/")
+def delete_character(character_id: int,):
+    """Update a character."""
+    if character_id is None:         
+        raise HTTPException(status_code=400, detail="Character field is empty")  
+    
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    cursor.execute("SELECT * FROM characters WHERE id = ? ", (character_id,))
+    c_row = cursor.fetchone()
+    if not c_row :        
+        raise HTTPException(status_code=404, detail="Character does not exist")
+
+    cursor.execute("DELETE FROM characters WHERE id = ? ", (character_id,))
+    conn.commit()
+    conn.close()
+    return {
+        "character_id": character_id,
+        "message": "Character deleted successfully"
+        }
