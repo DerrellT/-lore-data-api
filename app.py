@@ -137,6 +137,41 @@ def update_character(character_id: int, updated_name: str, new_region_id: int):
         "message": "Character updated successfully"
         }
 
+
+@app.put("/regions/")
+def update_region( region_id: int, updated_region_name: str,):
+    """Update a region."""
+    
+    if region_id is None:         
+        raise HTTPException(status_code=400, detail="Region field is empty") 
+
+    if not updated_region_name:
+        raise HTTPException(status_code=400, detail="Updated name field is empty") 
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    
+    cursor.execute("SELECT * FROM regions WHERE name = ? AND id != ? ", (updated_region_name, region_id)) #checks for duplicate name but not this current character
+    name_row = cursor.fetchone()
+    if name_row:
+        raise HTTPException(status_code=400, detail="Region exists")
+    
+    cursor.execute("SELECT * FROM regions WHERE id = ? ", (region_id,))
+    r_row = cursor.fetchone()
+    if r_row is None:
+        raise HTTPException(status_code=400, detail="Region does not exist")
+    
+    cursor.execute("UPDATE regions SET name = ? WHERE id = ?", (updated_region_name, region_id))
+    conn.commit()
+    conn.close()
+    return {
+        "region_id": region_id,
+        "updated_region_name": updated_region_name,
+        "message": "Region updated successfully"
+        }
+
+
+
 @app.delete("/characters/")
 def delete_character(character_id: int,):
     """Update a character."""
