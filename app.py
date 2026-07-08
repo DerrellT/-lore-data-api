@@ -98,6 +98,39 @@ def create_character(name: str, region_id: int): #str and int are the expected i
     conn.close()  
     return dict(new_char)
 
+@app.post("/regions/")
+def create_region(region_id: int, name: str): #str and int are the expected inputs
+    """Create a region."""
+    if not name:         
+        raise HTTPException(status_code=400, detail="Region name missing") 
+
+    if not region_id:        
+        raise HTTPException(status_code=400, detail="Region id missing") 
+ 
+    conn = get_db_connection()
+    cursor = conn.cursor()    
+    
+    cursor.execute("SELECT * FROM regions WHERE id = ? ", (region_id,)) #checks for duplicate name but not this current character
+    name_row = cursor.fetchone()
+    if name_row:
+        raise HTTPException(status_code=400, detail="Region id already exists")
+    
+    cursor.execute("SELECT * FROM regions WHERE name = ? ", (name,)) #SQL is exectuted
+    name_row = cursor.fetchone()
+    if name_row:
+        raise HTTPException(status_code=400, detail="Region name already exits")
+
+    cursor.execute("INSERT INTO regions (id, name) VALUES (?, ?)", (region_id, name)) # ? are place holders
+    conn.commit()
+    
+    cursor.execute("SELECT * FROM regions WHERE id = ? ", (region_id,)) #return the char the user created instead of echoing
+    new_reg = cursor.fetchone()
+    if new_reg is None:
+        raise HTTPException(status_code=400, detail="Region loading error")
+    conn.close()  
+    return dict(new_reg)
+
+
 @app.put("/characters/")
 def update_character(character_id: int, updated_name: str, new_region_id: int):
     """Update a character."""
