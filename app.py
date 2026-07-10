@@ -12,7 +12,23 @@ def get_db_connection():
     conn.row_factory = sqlite3.Row  # lets us return dict-like rows
     return conn
 
-# GET ALL CHARACTERS (SQL VERSION)
+@app.post("/login/")
+def user_login(username: str, password: str):
+    """User logs"""
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    cursor.execute("Select * FROM users WHERE username = ? AND password = ?", (username, password))
+    u_i = cursor.fetchone()
+    if not u_i:
+        raise HTTPException(status_code=400, detail="Invalid login") 
+    
+    conn.close()
+    return {
+        "message": "Login was successful"
+        }
+
+
 @app.get("/characters/")
 def get_all_chars():
     """Returns all characters only"""
