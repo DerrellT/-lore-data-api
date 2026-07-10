@@ -226,3 +226,25 @@ def delete_character(character_id: int,):
         "character_id": character_id,
         "message": "Character deleted successfully"
         }
+
+@app.delete("/regions/")
+def delete_region(region_id: int,):
+    """Update a character."""
+    if region_id is None:         
+        raise HTTPException(status_code=400, detail="Character field is empty")  
+    
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    cursor.execute("SELECT * FROM regions WHERE id = ? ", (region_id,))
+    r_row = cursor.fetchone()
+    if not r_row :        
+        raise HTTPException(status_code=404, detail="Region does not exist")
+
+    cursor.execute("DELETE FROM regions WHERE id = ? ", (region_id,))
+    conn.commit()
+    conn.close()
+    return {
+        "character_id": region_id,
+        "message": "Region deleted successfully"
+        }
