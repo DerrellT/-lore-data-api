@@ -1,7 +1,36 @@
 import sqlite3
-from fastapi import FastAPI, HTTPException
-
+from fastapi import FastAPI, HTTPException 
+from jose import jwt
+from datetime import datetime, timedelta, timezone
+from passlib.context import CryptContext
 app = FastAPI()
+
+# ----------------------------
+# JWT SETUP
+# ----------------------------
+
+SECRET_KEY = "I_SECRETLY_LOVE_CHEESECAKE" #private key API uses to sign tokens
+ALGORITHM = "HS256" #how token is created
+ACCESS_TOKEN_EXPIRE_MINUTES = 30
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
+def create_access_token(data: dict):  
+    token_data = data.copy()
+
+    expire = datetime.now(timezone.utc) + timedelta(
+        minutes=ACCESS_TOKEN_EXPIRE_MINUTES
+    )
+
+    token_data.update({"exp": expire})
+
+    token = jwt.encode(
+        token_data,
+        SECRET_KEY,
+        algorithm=ALGORITHM
+    )
+
+    return token
+
 
 # ----------------------------
 # DATABASE HELPER
@@ -18,14 +47,27 @@ def user_login(username: str, password: str):
     conn = get_db_connection()
     cursor = conn.cursor()
 
-    cursor.execute("Select * FROM users WHERE username = ? AND password = ?", (username, password))
+    cursor.execute("SELECT * FROM users WHERE username = ?", (username,))
     u_i = cursor.fetchone()
     if not u_i:
-        raise HTTPException(status_code=400, detail="Invalid login") 
+        conn.close()
+        raise HTTPException(status_code=400, detail="Invalid login")
     
+    stored_hash = u_i["password"]
+
+    if not pwd_context.verify(password, stored_hash):
+        conn.close()
+        raise HTTPException(status_code=400, detail="Invalid login")
+
+
+    user_data = {
+        "id": u_i["id"],
+        "username": u_i["username"]
+        }
     conn.close()
+
     return {
-        "message": "Login was successful"
+        "access_token": create_access_token(user_data)
         }
 
 

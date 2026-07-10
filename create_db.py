@@ -1,4 +1,8 @@
 import sqlite3
+from passlib.context import CryptContext
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+hashed_password = pwd_context.hash("Cheesecake")
+print(hashed_password)
 
 # CONNECT TO DATABASE
 # If "lore.db" does not exist, SQLite will CREATE it automatically.
@@ -35,8 +39,8 @@ CREATE TABLE IF NOT EXISTS characters (
 
 cursor.execute("""
 CREATE TABLE IF NOT EXISTS users (
-    Id INTEGER PRIMARY KEY ,
-    username TEXT NOT NULL ,
+    id INTEGER PRIMARY KEY ,
+    username TEXT NOT NULL UNIQUE,
     password TEXT NOT NULL 
 )
 """)
@@ -64,14 +68,12 @@ if cursor.fetchone()[0] == 0:
     VALUES (1, 'Jicho', 1), (2, 'Amara', 1), (3, 'Sikio', 2)
     """)
 
-cursor.execute("SELECT COUNT(*) FROM testuser")
+cursor.execute("SELECT COUNT(*) FROM users")
 
 if cursor.fetchone()[0] == 0:
-    
     cursor.execute("""
     INSERT INTO users (id, username, password)
-    VALUES (1, 'Kenny', 'Cheesecake')
-    """)
+    VALUES (?, ?, ?) """, (1, 'Kenny', '$2b$12$U1HkXYctJYF6PlBALAyt4ucy/XfwFiEfZ7hXU4ynZULKdT4y6z5pO'))
 
 
 conn.commit()
