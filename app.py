@@ -9,7 +9,7 @@ app = FastAPI()
 # JWT SETUP
 # ----------------------------
 
-SECRET_KEY = "I_SECRETLY_LOVE_CHEESECAKE" #private key API uses to sign tokens
+SECRET_KEY = "your-secret-key" #private key API uses to sign tokens
 ALGORITHM = "HS256" #how token is created
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -96,7 +96,10 @@ def get_character(name):        #name is extraced as parameter and calls get_cha
     conn.close()            #close connection
     if row is None:         #check if character exits
         raise HTTPException(status_code=404, detail="Character not found") 
-    return dict(row)
+    return {
+        "message": "Character found",
+        "character": dict(row)
+        }
 
 @app.get("/regions/")
 def get_all_regions():
@@ -122,7 +125,10 @@ def get_region(name):
     conn.close()
     if row is None:
         raise HTTPException(status_code=404, detail="Region not found") 
-    return dict(row)
+    return {
+        "message": "Region found",
+        "region": dict(row)
+        }
 
 @app.post("/characters/")
 def create_character(name: str, region_id: int): #str and int are the expected inputs
@@ -144,17 +150,18 @@ def create_character(name: str, region_id: int): #str and int are the expected i
     cursor.execute("SELECT * FROM characters WHERE name = ? ", (name,)) #SQL is exectuted
     name_row = cursor.fetchone()
     if name_row:
-        raise HTTPException(status_code=400, detail="Name already exits")
+        raise HTTPException(status_code=400, detail="Name already exists")
 
     cursor.execute("INSERT INTO characters (name, region_id) VALUES (?, ?)", (name, region_id)) # ? are place holders
     conn.commit() #commit before we query data
-    
-    cursor.execute("SELECT * FROM characters WHERE name = ? ", (name,)) #return the char the user created instead of echoing
-    new_char = cursor.fetchone()
-    if new_char is None:
-        raise HTTPException(status_code=400, detail="Character loading error")
-    conn.close()  
-    return dict(new_char)
+    cursor.execute( "SELECT * FROM characters WHERE name = ?", (name,))
+    new_character = cursor.fetchone()
+    conn.close()
+
+    return {
+        "message": "Character created successfully",
+        "character": dict(new_character)
+    }
 
 @app.post("/regions/")
 def create_region(region_id: int, name: str): #str and int are the expected inputs
@@ -176,17 +183,17 @@ def create_region(region_id: int, name: str): #str and int are the expected inpu
     cursor.execute("SELECT * FROM regions WHERE name = ? ", (name,)) #SQL is exectuted
     name_row = cursor.fetchone()
     if name_row:
-        raise HTTPException(status_code=400, detail="Region name already exits")
+        raise HTTPException(status_code=400, detail="Region name already exists")
 
     cursor.execute("INSERT INTO regions (id, name) VALUES (?, ?)", (region_id, name)) # ? are place holders
     conn.commit()
-    
-    cursor.execute("SELECT * FROM regions WHERE id = ? ", (region_id,)) #return the char the user created instead of echoing
-    new_reg = cursor.fetchone()
-    if new_reg is None:
-        raise HTTPException(status_code=400, detail="Region loading error")
-    conn.close()  
-    return dict(new_reg)
+    cursor.execute( "SELECT * FROM regions WHERE name = ?", (name,))
+    new_region = cursor.fetchone()
+    conn.close()
+    return {
+        "message": "Region created successfully",
+        "region": dict(new_region)
+    }
 
 
 @app.put("/characters/")
@@ -222,10 +229,11 @@ def update_character(character_id: int, updated_name: str, new_region_id: int):
     conn.commit()
     conn.close()
     return {
-        "character_id": character_id,
-        "updated_name": updated_name,
-        "new_region_id": new_region_id,
-        "message": "Character updated successfully"
+        "message": "Character updated successfully",
+        "character": {"id": character_id,
+        "name": updated_name,
+        "region_id": new_region_id
+        }
         }
 
 
@@ -256,16 +264,17 @@ def update_region( region_id: int, updated_region_name: str,):
     conn.commit()
     conn.close()
     return {
-        "region_id": region_id,
-        "updated_region_name": updated_region_name,
-        "message": "Region updated successfully"
+        "message": "Region updated successfully",
+        "region": {"id": region_id,
+        "name": updated_region_name
+        }
         }
 
 
 
 @app.delete("/characters/")
 def delete_character(character_id: int,):
-    """Update a character."""
+    """Delete a character."""
     if character_id is None:         
         raise HTTPException(status_code=400, detail="Character field is empty")  
     
@@ -275,21 +284,22 @@ def delete_character(character_id: int,):
     cursor.execute("SELECT * FROM characters WHERE id = ? ", (character_id,))
     c_row = cursor.fetchone()
     if not c_row :        
-        raise HTTPException(status_code=404, detail="Character does not exist")
+        raise HTTPException(status_code=404, detail="Character does not exists")
 
     cursor.execute("DELETE FROM characters WHERE id = ? ", (character_id,))
     conn.commit()
     conn.close()
     return {
-        "character_id": character_id,
-        "message": "Character deleted successfully"
+        "message": "Character deleted successfully",
+        "id": character_id
         }
+        
 
 @app.delete("/regions/")
 def delete_region(region_id: int,):
-    """Update a character."""
+    """Delete a region."""
     if region_id is None:         
-        raise HTTPException(status_code=400, detail="Character field is empty")  
+        raise HTTPException(status_code=400, detail="Region field is empty")  
     
     conn = get_db_connection()
     cursor = conn.cursor()
@@ -297,12 +307,16 @@ def delete_region(region_id: int,):
     cursor.execute("SELECT * FROM regions WHERE id = ? ", (region_id,))
     r_row = cursor.fetchone()
     if not r_row :        
-        raise HTTPException(status_code=404, detail="Region does not exist")
+        raise HTTPException(status_code=404, detail="Region does not exists")
 
     cursor.execute("DELETE FROM regions WHERE id = ? ", (region_id,))
     conn.commit()
     conn.close()
     return {
-        "character_id": region_id,
-        "message": "Region deleted successfully"
+        "message": "Region deleted successfully",
+        "id": region_id
+        
         }
+
+
+#uvicorn app:app --reload

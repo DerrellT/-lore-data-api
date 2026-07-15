@@ -1,15 +1,21 @@
 # Lore Data API
 
-- A beginner backend API built with FastAPI and SQLite, designed to practice real-world database-driven API development.
+- A beginner-friendly REST API built with FastAPI, SQLite, and JWT authentication to practice real-world backend development concepts, database design, and API testing.
 
 ⸻
 
 ## Project Overview
 
-- Lore Data API is a simple REST API that manages fictional world data, including characters and regions. The project focuses on learning backend fundamentals such as database design, SQL queries, and API development using FastAPI.
+- Lore Data API manages fictional world data, including characters and regions. The project was built to learn backend development fundamentals through hands-on implementation rather than tutorials.
 
-- This project is actively in development as I expand my understanding of backend systems.
+Throughout development, this was implemented:
 
+* RESTful CRUD endpoints
+* Relational database design
+* JWT-based user authentication
+* Password hashing with bcrypt
+* Unit testing with pytest
+* SQL queries using SQLite
 ⸻
 
 ## Tech Stack
@@ -17,7 +23,10 @@
 - Python 3
 - FastAPI
 - SQLite (built-in database)
-- SQL (raw queries)
+- Passlib (bycrypt)
+- Python-JOSE (JWT)
+- Pytest
+- Uvicorn
 
 ⸻
 
@@ -36,41 +45,85 @@ id (Primary Key)
 name
 region_id (Foreign Key -> regions.id)
 
-- This structure demonstrates basic relational database design and foreign key relationships.
+- users
+- id (Primary Key)
+- username
+- password (bcrypt hashed)
+- This demonstrates one-to-many relationships and basic relational database design.
 
 ⸻
 
-## API Endpoints so far:
+## Features
 
+- Character CRUD operations
+- Region CRUD operations
+- User login
+- Password hashing
+- JWT access token generation
+- Foreign key relationships
+- Error handling
+- Unit tests for API endpoints
+
+⸻
+
+## API Endpoints:
+
+* Characters 
 - GET /characters/
-- Returns all characters in the database.
 - GET /characters/{name}
-- Returns a single character by exact name match.
-- If the character does not exist, returns a 404 error.
+- POST /characters/
+- PUT /characters/
+- DELETE /characters/
+
+* Regions
+- GET /regions/
+- GET /regions/{name}
+- POST /regions/
+- PUT /regions/
+- DELETE /regions/
+
+* Authentication
+- POST /login/
+
+⸻
+
+## Testing
+
+Implemented automated API tests using pytest.
+- Character retrieval
+- Region retrieval
+- Login endpoint
+- Character creation
+- Region creation
+- Character update
+- Character deletion
 
 ⸻
 
 ## Key Concepts Learned:
 
-- How relational databases work (SQLite)
-- Primary keys vs foreign keys
-- SQL SELECT queries
-- Parameterized queries for safety
-- fetchone vs fetchall usage
-- Building REST APIs with FastAPI
-- Connecting Python applications to databases
+- Relational database design
+- Primary vs. foreign keys
+- SQL CRUD operations
+- Parameterized SQL queries
+- REST API development
+- JWT authentication
+- Password hashing
+- HTTP status codes
+- API testing with pytest
 
 ⸻
 
 # Project Status
 
-- This project is currently in active development. Future improvements include:
+This project is considered feature complete as a learning project. But future improvements may include:
 
-- Adding region based queries
-- Implementing search functionality
-- Expanding dataset relationships
-- Improving API structure and performance
-
+- Dedicated test database
+- SQLAlchemy ORM
+- Request/response models using Pydantic
+- Docker support
+- User registration
+- Role-based authorization
 ⸻
 
 ## How to Run
@@ -87,6 +140,7 @@ uvicorn app:app --reload
 
 4. Visit:
 http://127.0.0.1:8000/characters/
+
 
 ⸻
 
